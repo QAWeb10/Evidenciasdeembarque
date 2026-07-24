@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Evidencias de Embarque</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+:root{
+--dhl-red:#d40511;
+--dhl-yellow:#ffcc00;
+--background:#f4f6f8;
+--card:#ffffff;
+--border:#e1e5ea;
+--text:#2c3e50;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,Arial,sans-serif;}
+
+body{
+background:var(--background);
+color:var(--text);
+padding-bottom:120px;
+}
+
+.header{
+background:linear-gradient(90deg,var(--dhl-yellow),#ffd633);
+padding:18px;
+border-bottom:4px solid var(--dhl-red);
+position:sticky;
+top:0;
+z-index:10;
+}
+
+.header h1{font-size:22px;}
+.header small{display:block;margin-top:5px;}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:15px;
+}
+
+.embarque-card{
+background:white;
+border-radius:18px;
+box-shadow:0 5px 20px rgba(0,0,0,.1);
+margin-bottom:20px;
+overflow:hidden;
+}
+
+.embarque-title{
+padding:15px;
+background:#fafafa;
+color:var(--dhl-red);
+font-weight:bold;
+font-size:18px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.section{padding:18px;}
+
+.section-title{
+font-size:14px;
+font-weight:bold;
+margin-bottom:15px;
+color:var(--dhl-red);
+}
+
+/* CAMPOS EN GRID (MEJOR CELULAR) */
+.fields-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+
+@media(max-width:700px){
+.fields-grid{grid-template-columns:1fr;}
+}
+
+input,select{
+width:100%;
+padding:13px;
+border-radius:12px;
+border:1px solid var(--border);
+font-size:15px;
+margin-bottom:10px;
+background:white;
+}
+
+label{
+font-size:12px;
+font-weight:700;
+opacity:.8;
+}
+
+.photo-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:12px;
+}
+
+@media(max-width:700px){
+.photo-grid{grid-template-columns:1fr;}
+}
+
+.photo-card{
+border:1px solid var(--border);
+border-radius:15px;
+padding:12px;
+background:#fafafa;
+text-align:center;
+}
+
+.preview{
+width:100%;
+height:180px;
+object-fit:cover;
+border-radius:12px;
+margin-top:10px;
+}
+
+button{
+border:0;
+border-radius:14px;
+padding:15px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.btn-photo{width:100%;background:#003b75;color:white;}
+.btn-add{width:100%;background:#0b7d3b;color:white;margin-top:10px;}
+.btn-remove{width:100%;background:#d40511;color:white;}
+.btn-pdf{width:100%;background:#d40511;color:white;font-size:17px;}
+
+.fixed{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+padding:12px;
+background:white;
+box-shadow:0 -3px 10px #ddd;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h1>Evidencias de Embarque</h1>
+<small>DHL Supply Chain</small>
+</div>
+
+<div class="container">
+
+<div id="embarquesContainer"></div>
+
+<button class="btn-add" onclick="agregarEmbarque()">+ Agregar embarque</button>
+
+</div>
+
+<div class="fixed">
+<button class="btn-pdf" onclick="generarPDF()">Generar PDF</button>
+</div>
+
+<script>
+
+const STORAGE_KEY="embarques_v2";
+let embarques=[];
+
+function guardar(){
+localStorage.setItem(STORAGE_KEY,JSON.stringify(embarques));
+}
+
+function cargar(){
+let data=localStorage.getItem(STORAGE_KEY);
+if(data){
+embarques=JSON.parse(data);
+}else{
+embarques.push({cuadrilla:"",cortina:"",unidad:"",destino:"",fotoInicio:"",fotoMedio:"",fotoFin:""});
+}
+render();
+}
+
+function agregarEmbarque(){
+embarques.push({cuadrilla:"",cortina:"",unidad:"",destino:"",fotoInicio:"",fotoMedio:"",fotoFin:""});
+guardar();
+render();
+}
+
+function eliminar(i){
+embarques.splice(i,1);
+guardar();
+render();
+}
+
+function actualizar(i,c,v){
+embarques[i][c]=v;
+guardar();
+}
+
+function render(){
+
+let cont=document.getElementById("embarquesContainer");
+cont.innerHTML="";
+
+embarques.forEach((e,i)=>{
+
+cont.innerHTML+=`
+<div class="embarque-card">
+
+<div class="embarque-title">
+EMBARQUE #${i+1}
+</div>
+
+<div class="section">
+
+<div class="section-title">BLOQUE 1</div>
+
+<div class="fields-grid">
+
+<div>
+<label>CUADRILLA</label>
+<select onchange="actualizar(${i},'cuadrilla',this.value)">
+<option value="">Seleccione</option>
+<option ${e.cuadrilla=="A"?"selected":""}>A</option>
+<option ${e.cuadrilla=="B"?"selected":""}>B</option>
+<option ${e.cuadrilla=="C"?"selected":""}>C</option>
+<option ${e.cuadrilla=="D"?"selected":""}>D</option>
+</select>
+</div>
+
+<div>
+<label>CORTINA</label>
+<input maxlength="3" value="${e.cortina}"
+oninput="this.value=this.value.slice(0,3)"
+onchange="actualizar(${i},'cortina',this.value)">
+</div>
+
+<div>
+<label>UNIDAD</label>
+<input maxlength="10" value="${e.unidad}"
+oninput="this.value=this.value.slice(0,10)"
+onchange="actualizar(${i},'unidad',this.value)">
+</div>
+
+<div>
+<label>DESTINO</label>
+<select onchange="actualizar(${i},'destino',this.value)">
+<option value="">Seleccione</option>
+<option ${e.destino=="ONEST"?"selected":""}>ONEST</option>
+<option ${e.destino=="DHL"?"selected":""}>DHL</option>
+<option ${e.destino=="CLIENTE"?"selected":""}>CLIENTE</option>
+</select>
+</div>
+
+</div>
+
+</div>
+
+<div class="section">
+<div class="section-title">FOTOS</div>
+
+<div class="photo-grid">
+
+${foto(i,"fotoInicio","INICIO",e.fotoInicio)}
+${foto(i,"fotoMedio","MEDIO",e.fotoMedio)}
+${foto(i,"fotoFin","FIN",e.fotoFin)}
+
+</div>
+</div>
+
+<div class="section">
+<button class="btn-remove" onclick="eliminar(${i})">Eliminar</button>
+</div>
+
+</div>
+`;
+});
+}
+
+function foto(i,campo,titulo,img){
+return `
+<div class="photo-card">
+
+<b>${titulo}</b>
+
+<input type="file" accept="image/*" capture="environment"
+id="${campo+i}" style="display:none"
+onchange="cargarFoto(event,${i},'${campo}')">
+
+<button class="btn-photo"
+onclick="document.getElementById('${campo+i}').click()">
+Tomar foto
+</button>
+
+${img?`<img class="preview" src="${img}">`:""}
+
+</div>
+`;
+}
+
+async function cargarFoto(e,i,c){
+let file=e.target.files[0];
+if(!file)return;
+
+let img=await comprimir(file,1400,0.7);
+
+embarques[i][c]=img;
+guardar();
+render();
+}
+
+function comprimir(file,max,q){
+return new Promise(res=>{
+let r=new FileReader();
+r.onload=e=>{
+let img=new Image();
+img.onload=()=>{
+let c=document.createElement("canvas");
+let ratio=Math.min(max/img.width,max/img.height);
+c.width=img.width*ratio;
+c.height=img.height*ratio;
+c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+res(c.toDataURL("image/jpeg",q));
+};
+img.src=e.target.result;
+};
+r.readAsDataURL(file);
+});
+}
+
+function generarPDF(){
+const {jsPDF}=window.jspdf;
+let pdf=new jsPDF("landscape","mm","a4");
+
+embarques.forEach((e,i)=>{
+
+if(i>0)pdf.addPage();
+
+pdf.setFillColor(255,204,0);
+pdf.rect(0,0,297,210,"F");
+
+pdf.setFontSize(18);
+pdf.setTextColor(180,0,20);
+
+pdf.text(`CORTINA: ${e.cortina||""}`,15,20);
+pdf.text(`UNIDAD: ${e.unidad||""}`,95,20);
+pdf.text(`DESTINO: ${e.destino||""}`,220,20);
+
+const fotos=[e.fotoInicio,e.fotoMedio,e.fotoFin];
+const tit=["INICIO","MEDIO","FIN"];
+const x=[10,106,202];
+
+for(let j=0;j<3;j++){
+if(fotos[j]){
+pdf.addImage(fotos[j],"JPEG",x[j],40,85,120);
+}
+pdf.setFontSize(12);
+pdf.setTextColor(0,0,0);
+pdf.text(tit[j],x[j]+42,165,{align:"center"});
+}
+
+});
+
+pdf.save("Evidencia_Embarque.pdf");
+}
+
+cargar();
+
+</script>
+
+</body>
+</html>
