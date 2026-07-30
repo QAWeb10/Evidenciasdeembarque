@@ -514,6 +514,7 @@ z-index:10;
     border-collapse:collapse;
     background:white;
     font-size:13px;
+    table-layout:fixed;
 }
 
 .tabla-reportes th{
@@ -541,6 +542,28 @@ z-index:10;
     border-radius:8px;
     font-size:12px;
     font-weight:700;
+}
+
+.tabla-reportes th,
+.tabla-reportes td{
+    text-align:center;
+    vertical-align:middle;
+}
+
+.tabla-reportes th:nth-child(1){
+    width:20%;
+}
+
+.tabla-reportes th:nth-child(2){
+    width:35%;
+}
+
+.tabla-reportes th:nth-child(3){
+    width:20%;
+}
+
+.tabla-reportes th:nth-child(4){
+    width:25%;
 }
 
 </style>
@@ -2065,7 +2088,7 @@ const unidad =
 if(unidad.includes(texto)){
 
 reporte.style.display =
-"block";
+"table-row";
 
 }else{
 
