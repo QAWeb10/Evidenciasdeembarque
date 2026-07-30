@@ -153,41 +153,102 @@ select:focus{
 button{
 
     width:100%;
-
-    height:56px;
-
+    height:54px;
     border:none;
-
-    border-radius:16px;
-
+    border-radius:18px;
     cursor:pointer;
-
-    font-size:16px;
-
+    font-size:15px;
     font-weight:700;
-
+    letter-spacing:.3px;
     transition:.25s;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
 
 }
 
 button:hover{
 
-    transform:scale(.98);
+    transform:translateY(-2px);
 
 }
 
-.btn-primary{
-  background:var(--dhl-red);
-  color:white;
+button:active{
+
+    transform:scale(.97);
+
 }
 
-.btn-yellow{
-  background:var(--dhl-yellow);
-  color:black;
+/* BOTÓN PRINCIPAL */
+
+.btn-add{
+
+    background:linear-gradient(135deg,#FFD84A,#FFCC00);
+
+    color:#222;
+
+    border:2px solid #F2C300;
+
+    box-shadow:0 10px 20px rgba(255,204,0,.35);
+
 }
+
+.btn-delete{
+
+    background:#ffffff;
+
+    color:#D40511;
+
+    border:2px solid #D40511;
+
+    box-shadow:0 8px 16px rgba(212,5,17,.12);
+
+}
+
+.btn-delete:hover{
+
+    background:#D40511;
+
+    color:white;
+
+}
+
+.btn-save{
+
+    background:linear-gradient(135deg,#D40511,#8E0009);
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:800;
+
+    letter-spacing:.6px;
+
+    box-shadow:0 14px 28px rgba(212,5,17,.35);
+
+}
+
+/* BOTÓN SECUNDARIO */
 
 .btn-secondary{
-  background:#e5e5e5;
+
+    background:white;
+    color:#374151;
+    border:2px solid #E5E7EB;
+    box-shadow:0 6px 14px rgba(0,0,0,.06);
+
+}
+
+/* BOTÓN AMARILLO */
+
+.btn-yellow{
+
+    background:linear-gradient(135deg,#FFD84A,#FFCC00);
+    color:#111;
+    box-shadow:0 10px 18px rgba(255,204,0,.30);
+
 }
 
 h3{
@@ -253,17 +314,23 @@ flex-wrap:wrap;
 
 .header-buttons button{
 
-width:42px;
-
-height:42px;
-
-min-width:42px;
+width:48px;
+height:48px;
+min-width:48px;
 
 padding:0;
 
-border-radius:12px;
+background:rgba(255,255,255,.18);
 
-font-size:22px;
+border:1px solid rgba(255,255,255,.30);
+
+backdrop-filter:blur(10px);
+
+border-radius:16px;
+
+color:white;
+
+font-size:20px;
 
 display:flex;
 
@@ -271,16 +338,48 @@ justify-content:center;
 
 align-items:center;
 
+box-shadow:0 8px 18px rgba(0,0,0,.20);
+
+transition:.25s;
+
+}
+
+.header-buttons button:hover{
+
+background:rgba(255,255,255,.30);
+
+transform:translateY(-2px);
+
 }
 
 .acciones-finales{
-    display:flex;
-    gap:10px;
-    padding:20px;
+
+display:flex;
+
+gap:12px;
+
+padding:16px;
+
+position:sticky;
+
+bottom:0;
+
+background:white;
+
+box-shadow:0 -8px 20px rgba(0,0,0,.08);
+
+z-index:100;
+
 }
 
 .acciones-finales button{
-    flex:1;
+
+flex:1;
+
+height:58px;
+
+font-size:14px;
+
 }
 
 .menu-principal{
@@ -566,6 +665,30 @@ z-index:10;
     width:25%;
 }
 
+.firma-app{
+
+    text-align:center;
+
+    padding:18px 10px;
+
+    font-size:11px;
+
+    color:#9CA3AF;
+
+    font-weight:600;
+
+    letter-spacing:.4px;
+
+}
+
+.firma-app span{
+
+    color:#D40511;
+
+    font-weight:800;
+
+}
+
 </style>
 
 </head>
@@ -573,6 +696,8 @@ z-index:10;
 <body>
 
 <div id="app"></div>
+
+
 
 <script>
 
@@ -679,9 +804,13 @@ onclick="mostrarReportes()">
 
 </button>
 
- </div>
+</div>
 
- `;
+<div class="firma-app">
+Desarrollado por <span>Felix Montoya</span>
+</div>
+
+`;
 }
 
 /* ====================================
@@ -882,24 +1011,27 @@ function mostrarHome(){
 <div class="acciones-finales">
 
 <button
-class="btn-secondary"
+class="btn-add"
 onclick="agregarEmbarque()">
-AGREGAR EMBARQUE
+
+➕ AGREGAR EMBARQUE
+
 </button>
 
 <button
-class="btn-primary"
-onclick="guardarEmbarques()">
-GUARDAR
-</button>
+class="btn-save"
+onclick="guardarYGenerarPDF()">
 
-<button
-class="btn-yellow"
-onclick="generarPDF()">
-GENERAR PDF
+💾 GUARDAR PDF
+
 </button>
 
 </div>
+
+<div class="firma-app">
+Desarrollado por <span>Felix Montoya</span>
+</div>
+
 `;
 
 
@@ -951,21 +1083,49 @@ function agregarEmbarque(){
 
 </div>
 
-   <label>Destino</label>
+<label>Destino</label>
 
-   <select class="destino">
+<input
+    class="destino"
+    list="lista-destinos"
+    placeholder="Escriba el destino...">
 
-     <option value="">Seleccione</option>
-
-     <option>ONEST</option>
-
-     <option>CLIENTE</option>
-
-     <option>DHL</option>
-
-     <option>OTRO</option>
-
-   </select>
+<datalist id="lista-destinos">
+    <option value="ABARROTERA DEL DUERO">
+    <option value="ABARROTES CASA VARGAS">
+    <option value="AMAZON">
+    <option value="ARCA CONTINENTAL">
+    <option value="ARGENTINA">
+    <option value="BODEGA AURRERA">
+    <option value="BRASIL">
+    <option value="BRITISH AMERICAN TOBACCO">
+    <option value="CASA LEY">
+    <option value="CHEDRAUI">
+    <option value="CHILE">
+    <option value="CITY CLUB">
+    <option value="COLOMBIA">
+    <option value="COPPEL">
+    <option value="COSTA RICA">
+    <option value="COSTCO">
+    <option value="DEREMATE.COM">
+    <option value="ENLACE DK">
+    <option value="FARMACIAS DE SIMILARES">
+    <option value="FARMACON">
+    <option value="FARMACOS NACIONALES">
+    <option value="FRESKO">
+    <option value="GRUPO ZORRO ABARROTERO">
+    <option value="GUATEMALA">
+    <option value="H E B">
+    <option value="NADRO">
+    <option value="NICARAGUA">
+    <option value="OXXO">
+    <option value="PERÚ">
+    <option value="SAMS CLUB">
+    <option value="SAN PABLO FARMACIA">
+    <option value="SMART & FINAL">
+    <option value="SORIANA">
+    <option value="WALMART">
+</datalist>
 
    <hr>
 
@@ -1065,13 +1225,13 @@ FOTO FINAL
 
    <br><br>
 
-   <button
-   onclick="eliminarEmbarque(${contador})"
-   class="btn-secondary">
+<button
+onclick="eliminarEmbarque(${contador})"
+class="btn-delete">
 
-   ELIMINAR EMBARQUE
+🗑 ELIMINAR EMBARQUE
 
-   </button>
+</button>
 
  </div>
 
@@ -1427,8 +1587,7 @@ const fotoFinInput =
 fotos[2];
 
 const destino =
-selects[0].value;
-
+tarjeta.querySelector(".destino").value;
 
 let fotoInicioURL = "";
 let fotoMedioURL = "";
@@ -1523,6 +1682,24 @@ mostrarHome();
    );
 
  }
+
+}
+
+async function guardarYGenerarPDF(){
+
+const errores =
+validarEmbarques();
+
+if(errores.length > 0){
+
+    alert(errores.join("\n"));
+    return;
+
+}
+
+await generarPDF();
+
+await guardarEmbarques();
 
 }
 
@@ -1669,7 +1846,7 @@ const unidad =
 tarjeta.querySelector(".unidad").value;
 
   const destino =
-  selects[0].value;
+tarjeta.querySelector(".destino").value;
 
   const imgInicio =
   tarjeta.querySelector(
