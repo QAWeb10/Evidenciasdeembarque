@@ -324,8 +324,6 @@ background:rgba(255,255,255,.18);
 
 border:1px solid rgba(255,255,255,.30);
 
-backdrop-filter:blur(10px);
-
 border-radius:16px;
 
 color:white;
@@ -701,6 +699,17 @@ z-index:10;
 
 <script>
 
+window.onerror = function(msg,url,line){
+
+    alert(
+        "ERROR\n\n" +
+        msg +
+        "\nLínea: " +
+        line
+    );
+
+};
+
 /* ====================================
    SUPABASE
 ==================================== */
@@ -717,8 +726,6 @@ const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
-
-console.log("Supabase conectado");
 
 console.log("Supabase conectado");
 
@@ -787,7 +794,7 @@ function mostrarLogin(){
    </select>
 
    <button
-class="btn-primary"
+class="btn-save"
 onclick="acceder()">
 
 INGRESAR
@@ -916,7 +923,7 @@ ${filas}
 <div class="card">
 
 <button
-class="btn-primary"
+class="btn-save"
 onclick="mostrarLogin()">
 
 REGRESAR
@@ -1136,7 +1143,6 @@ function agregarEmbarque(){
 <input
 type="file"
 accept="image/*"
-capture="environment"
 onchange="previewImage(event,'inicio-${contador}')">
 
 <button
@@ -1166,7 +1172,6 @@ FOTO INICIO
 <input
 type="file"
 accept="image/*"
-capture="environment"
 onchange="previewImage(event,'medio-${contador}')">
 
 <button
@@ -1196,7 +1201,6 @@ FOTO MEDIO
 <input
 type="file"
 accept="image/*"
-capture="environment"
 onchange="previewImage(event,'fin-${contador}')">
 
 <button
@@ -1277,7 +1281,11 @@ function previewImage(
 
   imagen.style.display =
   "block";
-  imagen.previousElementSibling.style.display="none";
+  const icono = imagen.previousElementSibling;
+
+if(icono){
+    icono.style.display="none";
+}
 
   const boton =
 document.getElementById(
@@ -1310,16 +1318,6 @@ function validarEmbarques(){
 
  tarjetas.forEach(
  (tarjeta,index)=>{
-
- const inputs =
- tarjeta.querySelectorAll(
- "input"
- );
-
- const selects =
- tarjeta.querySelectorAll(
- "select"
- );
 
 const cortina =
 tarjeta.querySelector(".cortina").value.trim();
@@ -1468,12 +1466,21 @@ mostrarConfirmacion(
 
 function(){
 
-const imagen =
-document.getElementById(imageId);
+const imagen = document.getElementById(imageId);
+
+const input = imagen.parentElement.parentElement.querySelector("input[type='file']");
+
+input.value = "";
 
 imagen.src = "";
 
 imagen.style.display = "none";
+
+const icono = imagen.previousElementSibling;
+
+if(icono){
+    icono.style.display = "flex";
+}
 
 boton.style.display = "none";
 
@@ -1701,71 +1708,7 @@ await guardarEmbarques();
 
 async function comprimirImagen(file){
 
- return new Promise((resolve)=>{
-
-   const img = new Image();
-
-   const lector = new FileReader();
-
-   lector.onload = function(e){
-
-      img.src = e.target.result;
-
-   };
-
-   img.onload = function(){
-
-      const canvas =
-      document.createElement("canvas");
-
-      let width = img.width;
-      let height = img.height;
-
-      const MAX_WIDTH = 1280;
-
-      if(width > MAX_WIDTH){
-
-         height =
-         height * (MAX_WIDTH / width);
-
-         width =
-         MAX_WIDTH;
-
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-
-      const ctx =
-      canvas.getContext("2d");
-
-      ctx.drawImage(
-         img,
-         0,
-         0,
-         width,
-         height
-      );
-
-      canvas.toBlob(
-
-        function(blob){
-
-          resolve(blob);
-
-        },
-
-        "image/jpeg",
-
-        0.70
-
-      );
-
-   };
-
-   lector.readAsDataURL(file);
-
- });
+    return file;
 
 }
 
@@ -1927,9 +1870,10 @@ tarjeta.querySelector(".destino").value;
   // FOTO INICIO
 
   if(
-   imgInicio &&
-   imgInicio.src
-  ){
+imgInicio &&
+imgInicio.src &&
+imgInicio.src.startsWith("data:image")
+){
 
    pdf.addImage(
     imgInicio.src,
@@ -1944,10 +1888,11 @@ tarjeta.querySelector(".destino").value;
 
   // FOTO MEDIO
 
-  if(
-   imgMedio &&
-   imgMedio.src
-  ){
+ if(
+imgMedio &&
+imgMedio.src &&
+imgMedio.src.startsWith("data:image")
+){
 
    pdf.addImage(
     imgMedio.src,
@@ -1962,10 +1907,11 @@ tarjeta.querySelector(".destino").value;
 
   // FOTO FINAL
 
-  if(
-   imgFin &&
-   imgFin.src
-  ){
+ if(
+imgFin &&
+imgFin.src &&
+imgFin.src.startsWith("data:image")
+){
 
    pdf.addImage(
     imgFin.src,
