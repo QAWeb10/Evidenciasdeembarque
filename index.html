@@ -1989,15 +1989,69 @@ let fotoMedio = "";
 let fotoFin = "";
 
 if(fotos[0].files.length){
-    fotoInicio = await subirImagen(fotos[0].files[0]);
+
+    fotoInicio =
+    await subirImagen(
+        fotos[0].files[0]
+    );
+
+}else if(
+    imgInicio.src &&
+    imgInicio.src.startsWith("data:image")
+){
+
+    fotoInicio =
+    await subirImagen(
+        base64ToFile(
+            imgInicio.src,
+            "inicio.jpg"
+        )
+    );
+
 }
 
 if(fotos[1].files.length){
-    fotoMedio = await subirImagen(fotos[1].files[0]);
+
+    fotoMedio =
+    await subirImagen(
+        fotos[1].files[0]
+    );
+
+}else if(
+    imgMedio.src &&
+    imgMedio.src.startsWith("data:image")
+){
+
+    fotoMedio =
+    await subirImagen(
+        base64ToFile(
+            imgMedio.src,
+            "medio.jpg"
+        )
+    );
+
 }
 
 if(fotos[2].files.length){
-    fotoFin = await subirImagen(fotos[2].files[0]);
+
+    fotoFin =
+    await subirImagen(
+        fotos[2].files[0]
+    );
+
+}else if(
+    imgFin.src &&
+    imgFin.src.startsWith("data:image")
+){
+
+    fotoFin =
+    await subirImagen(
+        base64ToFile(
+            imgFin.src,
+            "fin.jpg"
+        )
+    );
+
 }
 
 const {error}=
@@ -2170,6 +2224,36 @@ mostrarHome();
 async function comprimirImagen(file){
 
     return file;
+
+}
+
+function base64ToFile(base64,nombre){
+
+const partes = base64.split(",");
+
+const mime =
+partes[0].match(/:(.*?);/)[1];
+
+const binario =
+atob(partes[1]);
+
+let n = binario.length;
+
+const u8arr =
+new Uint8Array(n);
+
+while(n--){
+
+u8arr[n] =
+binario.charCodeAt(n);
+
+}
+
+return new File(
+[u8arr],
+nombre,
+{type:mime}
+);
 
 }
 
@@ -2443,45 +2527,23 @@ img.crossOrigin = "anonymous";
 
 img.onload = function(){
 
-let ancho = img.width;
-let alto = img.height;
-
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
-// Si la foto viene vertical, la gira para el PDF
-if(alto > ancho){
+canvas.width = img.width;
+canvas.height = img.height;
 
-    canvas.width = alto;
-    canvas.height = ancho;
-
-    ctx.translate(alto/2, ancho/2);
-    ctx.rotate(90 * Math.PI / 180);
-
-    ctx.drawImage(
-        img,
-        -ancho/2,
-        -alto/2
-    );
-
-}else{
-
-    canvas.width = ancho;
-    canvas.height = alto;
-
-    ctx.drawImage(
-        img,
-        0,
-        0
-    );
-
-}
+ctx.drawImage(
+    img,
+    0,
+    0
+);
 
 resolve(
-canvas.toDataURL(
-"image/jpeg",
-0.9
-)
+    canvas.toDataURL(
+        "image/jpeg",
+        0.9
+    )
 );
 
 };
