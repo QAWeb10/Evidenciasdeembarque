@@ -1268,7 +1268,6 @@ class="btn-save">
 
 </button>
 
-
 <button
 onclick="eliminarEmbarque(${contador})"
 class="btn-delete">
@@ -1289,10 +1288,8 @@ class="btn-delete">
  "beforeend",
  html
  );
-
-}
-
 guardarJornadaLocal();
+}
 
 function crearEmbarqueDesdeDatos(item){
 
@@ -1614,44 +1611,44 @@ fotos[2];
 
  }
 
- if(
- !fotoInicio.files ||
- fotoInicio.files.length === 0
+const imgInicio =
+tarjeta.querySelector("[id^='inicio-']");
+
+const imgMedio =
+tarjeta.querySelector("[id^='medio-']");
+
+const imgFin =
+tarjeta.querySelector("[id^='fin-']");
+
+if(
+!imgInicio ||
+!imgInicio.getAttribute("src")
 ){
 
  errores.push(
- `Embarque ${
- index+1
- }:
- Falta fotografía inicio`
+ `Embarque ${index+1}: Falta fotografía inicio`
  );
 
 }
 
 if(
- !fotoMedio.files ||
- fotoMedio.files.length === 0
+!imgMedio ||
+!imgMedio.getAttribute("src")
 ){
 
  errores.push(
- `Embarque ${
- index+1
- }:
- Falta fotografía medio`
+ `Embarque ${index+1}: Falta fotografía medio`
  );
 
 }
 
 if(
- !fotoFin.files ||
- fotoFin.files.length === 0
+!imgFin ||
+!imgFin.getAttribute("src")
 ){
 
  errores.push(
- `Embarque ${
- index+1
- }:
- Falta fotografía fin`
+ `Embarque ${index+1}: Falta fotografía fin`
  );
 
 }
@@ -1690,6 +1687,7 @@ if(icono){
 }
 
 boton.style.display = "none";
+guardarJornadaLocal();
 
 }
 
@@ -1708,6 +1706,8 @@ function(){
 document
 .getElementById(`embarque-${id}`)
 .remove();
+
+guardarJornadaLocal();
 
 }
 
@@ -1950,56 +1950,55 @@ return;
 
 }
 
-
 const fotos =
 tarjeta.querySelectorAll(
 "input[type='file']"
 );
 
+const imgInicio =
+tarjeta.querySelector("[id^='inicio-']");
+
+const imgMedio =
+tarjeta.querySelector("[id^='medio-']");
+
+const imgFin =
+tarjeta.querySelector("[id^='fin-']");
 
 if(
-fotos[0].files.length===0 ||
-fotos[1].files.length===0 ||
-fotos[2].files.length===0
+!imgInicio.getAttribute("src")
+||
+!imgMedio.getAttribute("src")
+||
+!imgFin.getAttribute("src")
 ){
 
-alert(
-"Faltan fotografías"
-);
+alert("Faltan fotografías");
 
 return;
 
 }
 
-
-
 mostrarAlerta(
 "Guardando embarque..."
 );
 
-
-
 try{
 
+let fotoInicio = "";
+let fotoMedio = "";
+let fotoFin = "";
 
-let fotoInicio =
-await subirImagen(
-fotos[0].files[0]
-);
+if(fotos[0].files.length){
+    fotoInicio = await subirImagen(fotos[0].files[0]);
+}
 
+if(fotos[1].files.length){
+    fotoMedio = await subirImagen(fotos[1].files[0]);
+}
 
-let fotoMedio =
-await subirImagen(
-fotos[1].files[0]
-);
-
-
-let fotoFin =
-await subirImagen(
-fotos[2].files[0]
-);
-
-
+if(fotos[2].files.length){
+    fotoFin = await subirImagen(fotos[2].files[0]);
+}
 
 const {error}=
 
